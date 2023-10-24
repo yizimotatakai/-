@@ -393,6 +393,23 @@ class SnifferMainWindow(snifferui,QtWidgets.QMainWindow):
             arpHwdst.setText(0,'目的MAC地址：%s' % packet[ARP].hwdst)
             arpPdst = QtWidgets.QTreeWidgetItem(arp)
             arpPdst.setText(0,'目的IP地址：%s' % packet[ARP].pdst)
+            self.textBrowserRaw.clear()
+            if packet.haslayer('Raw'):
+                self.textBrowserRaw.append('Raw：%s' % packet[Raw].load.decode('utf-8', 'ignore'))
+            if packet.haslayer('Padding'):
+                self.textBrowserRaw.append('Padding：%s' % packet[Padding].load.decode('utf-8', 'ignore'))
+        self.textBrowserDump.clear()
+        f = open('hexdump.tmp', 'w')
+        old = sys.stdout
+        sys.stdout = f
+        hexdump(packet)
+        sys.stdout = old
+        f.close()
+        f = open('hexdump.tmp', 'r')
+        content = f.read()
+        self.textBrowserDump.append(content)
+        f.close()
+        os.remove('hexdump.tmp')
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
